@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ModeToggle } from "./components/ui/mode-toggle";
-import { Upload, Copy, Code2 } from "lucide-react";
+import { Upload, Copy, Code2, ArrowRight } from "lucide-react";
 import { toast } from "./components/ui/use-toast";
 import { Toggle } from "./components/ui/toggle";
 
@@ -26,6 +26,7 @@ const Notepad = () => {
     const savedNote = localStorage.getItem("note");
     if (savedNote) {
       setNote(savedNote);
+      console.log("wow");
     }
   }, []);
 
@@ -63,41 +64,39 @@ const Notepad = () => {
           <CardDescription>메모를 간단하게 적고 공유해보세요.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
-            <div className="grid w-full items-center gap-4">
-              <div className="">
-                <Textarea
-                  id="note"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="여기에 텍스트를 적으세요!"
-                  rows={10}
-                  cols={50}
+          <div className="grid w-full items-center gap-4">
+            <div className="">
+              <Textarea
+                id="note"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="여기에 텍스트를 적으세요!"
+                rows={10}
+                cols={50}
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <div className="flex space-x-2">
+                <Input
+                  id="link"
+                  disabled={link ? false : true}
+                  placeholder="생성 버튼을 누르면 여기에 링크가 표시됩니다."
+                  value={link ? link : ""}
+                  readOnly={true}
                 />
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <div className="flex space-x-2">
-                  <Input
-                    id="link"
-                    disabled={link ? false : true}
-                    placeholder="생성 버튼을 누르면 여기에 링크가 표시됩니다."
-                    value={link ? link : ""}
-                    readOnly={true}
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={link ? false : true}
-                    onClick={() => {
-                      navigator.clipboard.writeText(link);
-                    }}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={link ? false : true}
+                  onClick={() => {
+                    navigator.clipboard.writeText(link);
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-          </form>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-between">
           <div className="flex space-x-2">
@@ -130,6 +129,7 @@ const Notepad = () => {
           </div>
           <Button className="font-bold" onClick={saveNote}>
             생성
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </CardFooter>
       </Card>

@@ -12,12 +12,14 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ModeToggle } from "./components/ui/mode-toggle";
-import { Upload, Copy } from "lucide-react";
+import { Upload, Copy, Code2 } from "lucide-react";
 import { toast } from "./components/ui/use-toast";
+import { Toggle } from "./components/ui/toggle";
 
 const Notepad = () => {
   const [note, setNote] = useState("");
   const [link, setLink] = useState("");
+  const [isApiMode, setIsApiMode] = useState(false);
 
   // Load saved note from local storage on component mount
   useEffect(() => {
@@ -45,7 +47,12 @@ const Notepad = () => {
       description: "노트가 저장되어 링크가 생성됩니다.",
     });
 
-    setLink(`${window.location.origin}/${makeDummyId(6)}`);
+    const link = new URL(`${window.location.origin}/${makeDummyId(6)}`);
+
+    if (isApiMode) {
+      link.hostname = "api-" + link.hostname;
+    }
+    setLink(link.toString());
   };
 
   return (
@@ -97,6 +104,28 @@ const Notepad = () => {
             <Button variant="outline" size="icon">
               <Upload className="h-4 w-4" />
             </Button>
+            <Toggle
+              variant="outline"
+              pressed={isApiMode}
+              onClick={() => {
+                if (!link) {
+                  return;
+                }
+
+                const url = new URL(link);
+                if (url.hostname === "api-" + window.location.hostname) {
+                  url.hostname = window.location.hostname;
+                } else {
+                  url.hostname = "api-" + url.hostname;
+                }
+
+                setLink(url.toString());
+                setIsApiMode((prev) => !prev);
+              }}
+              disabled={!link}
+            >
+              <Code2 className="h-4 w-4" />
+            </Toggle>
             <ModeToggle />
           </div>
           <Button className="font-bold" onClick={saveNote}>

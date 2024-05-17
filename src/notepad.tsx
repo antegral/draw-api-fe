@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ModeToggle } from "./components/ui/mode-toggle";
+import { Upload } from "lucide-react";
 
 const Notepad = () => {
   const [note, setNote] = useState("");
@@ -62,7 +63,12 @@ const Notepad = () => {
           </form>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <ModeToggle />
+          <div className="flex space-x-2">
+            <Button variant="outline" size="icon">
+              <Upload className="h-4 w-4" />
+            </Button>
+            <ModeToggle />
+          </div>
           <Button className="font-bold" onClick={saveNote}>
             생성
           </Button>

@@ -13,9 +13,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { ModeToggle } from "./components/ui/mode-toggle";
 import { Upload } from "lucide-react";
+import { toast } from "./components/ui/use-toast";
 
 const Notepad = () => {
   const [note, setNote] = useState("");
+  const [link, setLink] = useState("");
 
   // Load saved note from local storage on component mount
   useEffect(() => {
@@ -28,7 +30,13 @@ const Notepad = () => {
   // Save note to local storage
   const saveNote = () => {
     localStorage.setItem("note", note);
-    alert("Note saved!");
+
+    toast({
+      title: "저장 완료!",
+      description: "노트가 저장되어 링크가 생성됩니다.",
+    });
+
+    setLink("https://notepad.antegral.net/dLi39P2v");
   };
 
   return (
@@ -56,7 +64,7 @@ const Notepad = () => {
                   id="name"
                   disabled={true}
                   placeholder="생성 버튼을 누르면 여기에 링크가 표시됩니다."
-                  value={"https://notepad.antegral.net/dLi39P2v"}
+                  value={link ? link : ""}
                 />
               </div>
             </div>

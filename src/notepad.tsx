@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ModeToggle } from "./components/ui/mode-toggle";
 
 const Notepad = () => {
   const [note, setNote] = useState("");
@@ -33,7 +34,7 @@ const Notepad = () => {
     <div className="flex justify-center items-center min-h-screen">
       <Card className="w-[550px] content-center">
         <CardHeader>
-          <CardTitle>온라인 메모장</CardTitle>
+          <CardTitle className="font-bold">온라인 메모장</CardTitle>
           <CardDescription>메모를 간단하게 적고 공유해보세요.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -61,7 +62,10 @@ const Notepad = () => {
           </form>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button onClick={saveNote}>생성</Button>
+          <ModeToggle />
+          <Button className="font-bold" onClick={saveNote}>
+            생성
+          </Button>
         </CardFooter>
       </Card>
     </div>

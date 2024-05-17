@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ModeToggle } from "./components/ui/mode-toggle";
-import { Upload } from "lucide-react";
+import { Upload, Copy } from "lucide-react";
 import { toast } from "./components/ui/use-toast";
 
 const Notepad = () => {
@@ -30,6 +30,15 @@ const Notepad = () => {
   // Save note to local storage
   const saveNote = () => {
     localStorage.setItem("note", note);
+
+    if (!note) {
+      toast({
+        title: "저장 실패!",
+        description: "노트를 입력해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     toast({
       title: "저장 완료!",
@@ -60,12 +69,25 @@ const Notepad = () => {
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Input
-                  id="name"
-                  disabled={true}
-                  placeholder="생성 버튼을 누르면 여기에 링크가 표시됩니다."
-                  value={link ? link : ""}
-                />
+                <div className="flex space-x-2">
+                  <Input
+                    id="link"
+                    disabled={link ? false : true}
+                    placeholder="생성 버튼을 누르면 여기에 링크가 표시됩니다."
+                    value={link ? link : ""}
+                    readOnly={true}
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={link ? false : true}
+                    onClick={() => {
+                      navigator.clipboard.writeText(link);
+                    }}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </form>

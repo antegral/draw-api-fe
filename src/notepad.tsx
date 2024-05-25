@@ -173,9 +173,6 @@ const Notepad = () => {
         </CardContent>
         <CardFooter className="flex justify-between">
           <div className="flex space-x-2">
-            <Button variant="outline" size="icon">
-              <Upload className="h-4 w-4" />
-            </Button>
             <Toggle
               variant="outline"
               pressed={isApiMode}

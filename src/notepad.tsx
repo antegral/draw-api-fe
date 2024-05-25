@@ -15,10 +15,14 @@ import { ModeToggle } from "./components/ui/mode-toggle";
 import { Upload, Copy, Code2, ArrowRight } from "lucide-react";
 import { toast } from "./components/ui/use-toast";
 import { Toggle } from "./components/ui/toggle";
+import Axios from "axios";
+
+const API_ENDPOINT = "http://192.168.1.100:47294/clip";
 
 const Notepad = () => {
   const [note, setNote] = useState("");
   const [link, setLink] = useState("");
+  const [id, setId] = useState(0);
   const [isApiMode, setIsApiMode] = useState(false);
 
   // Load saved note from local storage on component mount
@@ -26,7 +30,42 @@ const Notepad = () => {
     const savedNote = localStorage.getItem("note");
     if (savedNote) {
       setNote(savedNote);
-      console.log("wow");
+    }
+
+    const path = window.location.pathname;
+    if (path.length > 1) {
+      const id = path.substring(1);
+      Axios.get(API_ENDPOINT + "/" + id)
+        .then((resp) => {
+          if (resp.status !== 200) {
+            toast({
+              title: "로드 실패!",
+              description: "서버로부터 잘못된 응답을 수신했습니다.",
+              variant: "destructive",
+            });
+          }
+
+          if (typeof resp.data?.BOARD_CONTENT !== "string") {
+            console.error(`Invalid response: ${JSON.stringify(resp.data)}`);
+            toast({
+              title: "로드 실패!",
+              description: "유효하지 않거나 없는 노트입니다.",
+              variant: "destructive",
+            });
+          }
+
+          setId(resp.data.BOARD_SN);
+          setLink(window.location.href);
+          setNote(resp.data.BOARD_CONTENT);
+        })
+        .catch((e) => {
+          console.error(e);
+          toast({
+            title: "로드 실패!",
+            description: "노트를 불러오는데 실패했습니다.",
+            variant: "destructive",
+          });
+        });
     }
   }, []);
 
@@ -43,17 +82,51 @@ const Notepad = () => {
       return;
     }
 
-    toast({
-      title: "저장 완료!",
-      description: "노트가 저장되어 링크가 생성됩니다.",
-    });
+    Axios.post(API_ENDPOINT, {
+      boardContent: note,
+    })
+      .then((resp) => {
+        if (resp.status !== 200) {
+          toast({
+            title: "저장 실패!",
+            description: "서버로부터 잘못된 응답을 수신했습니다.",
+            variant: "destructive",
+          });
+        }
 
-    const link = new URL(`${window.location.origin}/${makeDummyId(6)}`);
+        if (typeof resp.data?.id !== "number" || resp.data?.id < 0) {
+          toast({
+            title: "저장 실패!",
+            description: "서버로부터 잘못된 값을 수신했습니다.",
+            variant: "destructive",
+          });
+        }
 
-    if (isApiMode) {
-      link.hostname = "api-" + link.hostname;
-    }
-    setLink(link.toString());
+        const link = new URL(`${window.location.origin}/${resp.data.id}`);
+
+        console.log(`API Mode: ${isApiMode}`);
+        if (isApiMode) {
+          link.hostname = API_ENDPOINT + "/" + resp.data.id;
+        }
+
+        setId(resp.data.id);
+
+        console.log(`Link: ${link.toString()}`);
+        setLink(link.toString());
+
+        toast({
+          title: "저장 완료!",
+          description: "노트가 저장되어 링크가 생성됩니다.",
+        });
+      })
+      .catch((e) => {
+        console.error(e);
+        toast({
+          title: "저장 실패!",
+          description: "내부 처리 오류가 발생했습니다.",
+          variant: "destructive",
+        });
+      });
   };
 
   return (
@@ -111,13 +184,25 @@ const Notepad = () => {
                   return;
                 }
 
-                const url = new URL(link);
-                if (url.hostname === "api-" + window.location.hostname) {
-                  url.hostname = window.location.hostname;
+                let url = new URL(link);
+                console.log(`DevMode Switching... URL: ${url.toString()}`);
+
+                if (url.toString().startsWith(API_ENDPOINT)) {
+                  console.log(`DEVMODE -> NORMAL / ID: ${id}`);
+                  url = new URL(
+                    `${window.location.protocol}//${window.location.hostname}${
+                      window.location.port == "80" ||
+                      window.location.port == "443"
+                        ? ""
+                        : ":" + window.location.port
+                    }/${id}`
+                  );
                 } else {
-                  url.hostname = "api-" + url.hostname;
+                  console.log(`NORMAL -> DEVMODE`);
+                  url = new URL(API_ENDPOINT + "/" + id);
                 }
 
+                console.log(`DevMode Switched. URL: ${url.toString()}`);
                 setLink(url.toString());
                 setIsApiMode((prev) => !prev);
               }}
@@ -137,17 +222,17 @@ const Notepad = () => {
   );
 };
 
-function makeDummyId(length: number) {
-  let result = "";
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const charactersLength = characters.length;
-  let counter = 0;
-  while (counter < length) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    counter += 1;
-  }
-  return result;
-}
+// function makeDummyId(length: number) {
+//   let result = "";
+//   const characters =
+//     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+//   const charactersLength = characters.length;
+//   let counter = 0;
+//   while (counter < length) {
+//     result += characters.charAt(Math.floor(Math.random() * charactersLength));
+//     counter += 1;
+//   }
+//   return result;
+// }
 
 export default Notepad;
